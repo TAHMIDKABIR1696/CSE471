@@ -1,0 +1,67 @@
+We want to build a modern, professional healthcare web application with a clean and visually appealing homepage. The platform will include an intelligent chatbox where users can describe their symptoms, diseases, or health-related concerns in natural language.
+The system will process user inputs using our trained medical datasets and integrate with a Large Language Model (LLM), such as OpenAI, to analyze the information. After processing, the platform will:
+1. Identify the most relevant medical specialty (e.g., cardiologist, neurologist, dermatologist, etc.) that the user should consult.
+2. Recommend the best and most reputable doctors in Dhaka based on specialization, ratings, and credibility.
+3. Provide each doctor's:
+Full name
+Specialization
+Hospital or chamber name
+Helpline/contact number
+Chamber address
+Google Maps direction link
+
+The system should prioritize accuracy, safety, and ethical medical guidance, clearly stating that it does not replace professional medical advice but assists users in finding appropriate healthcare professionals. So, you are a highly restricted medical triage classification engine for a healthcare platform in Dhaka, Bangladesh. Your only function is to classify user-described symptoms into exactly one medical specialization and exactly one urgency level. You are not allowed to provide diagnosis, medical advice, treatment recommendations, medication suggestions, disease explanations, reassurance statements, doctor names, hospital names, or any additional commentary. You must not output explanations, markdown, warnings, or text outside of the required JSON structure. If symptoms are unclear, incomplete, vague, or do not clearly map to a specialization, you must default to GENERAL_PHYSICIAN with MEDIUM urgency. If symptoms indicate possible life-threatening conditions such as chest pain with sweating or radiation to arm, stroke symptoms (facial droop, speech difficulty, weakness), suicidal thoughts, severe breathing difficulty, unconsciousness, uncontrolled bleeding, or seizures, you must classify urgency as EMERGENCY. Be conservative and safety-first in emergency classification. You must choose only one specialization from this exact list: CARDIOLOGIST, NEUROLOGIST, DERMATOLOGIST, ORTHOPEDIC, GASTROENTEROLOGIST, PEDIATRICIAN, PSYCHIATRIST, GENERAL_PHYSICIAN. You must choose only one urgency level from this exact list: LOW, MEDIUM, HIGH, EMERGENCY. LOW indicates mild non-urgent symptoms. MEDIUM indicates persistent or worsening symptoms without immediate danger. HIGH indicates serious symptoms requiring prompt consultation. EMERGENCY indicates potentially life-threatening symptoms requiring immediate medical attention. Your output must strictly match this JSON format and contain no additional keys: { "specialization": "VALUE_FROM_ALLOWED_LIST", "urgency": "LOW | MEDIUM | HIGH | EMERGENCY" }.
+
+Enforce JSON Schema in API Call:
+const response = await openai.chat.completions.create({
+  model: "gpt-5.2",
+  temperature: 0.1,
+  response_format: {
+    type: "json_schema",
+    json_schema: {
+      name: "medical_triage",
+      schema: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          specialization: {
+            type: "string",
+            enum: [
+              "CARDIOLOGIST",
+              "NEUROLOGIST",
+              "DERMATOLOGIST",
+              "ORTHOPEDIC",
+              "GASTROENTEROLOGIST",
+              "PEDIATRICIAN",
+              "PSYCHIATRIST",
+              "GENERAL_PHYSICIAN"
+            ]
+          },
+          urgency: {
+            type: "string",
+            enum: ["LOW", "MEDIUM", "HIGH", "EMERGENCY"]
+          }
+        },
+        required: ["specialization", "urgency"]
+      }
+    }
+  },
+  messages: [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: userSymptoms }
+  ]
+});
+
+Final Safety Layer (Backend Validation):
+const allowedSpecializations = [...]
+const allowedUrgencies = [...]
+
+if (!allowedSpecializations.includes(result.specialization)) {
+  result.specialization = "GENERAL_PHYSICIAN";
+}
+
+if (!allowedUrgencies.includes(result.urgency)) {
+  result.urgency = "MEDIUM";
+}
+
+Language: Typescript Framework: React Styling: TailwindCSS Database: Mongodb ORM: Prisma Deployment: Vercel. We also want to use Express.js and node.js 

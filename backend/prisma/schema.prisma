@@ -7,16 +7,85 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Specialization {
+  CARDIOLOGIST
+  NEUROLOGIST
+  DERMATOLOGIST
+  ORTHOPEDIC
+  GASTROENTEROLOGIST
+  PEDIATRICIAN
+  PSYCHIATRIST
+  GENERAL_PHYSICIAN
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+  EMERGENCY
+}
+
+enum TriageSource {
+  OPENAI
+  RULE_BASED
+}
+
 model Doctor {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  specialization String
-  hospital       String
-  chamber        String
-  helpline       String
-  address        String
-  mapsLink       String
-  rating         Float
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  specialization   Specialization       @default(GENERAL_PHYSICIAN)
+  hospital         String
+  chamber          String
+  helpline         String
+  address          String
+  mapsLink         String
+  city             String               @default("Dhaka")
+  rating           Float                @default(0)
+  credibilityScore Float                @default(0)
+  isActive         Boolean              @default(true)
+  metadata         Json?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  recommendations  TriageRecommendation[]
+
+  @@index([specialization])
+  @@index([city])
+  @@index([rating])
+  @@index([credibilityScore])
+  @@index([isActive])
+  @@map("doctors")
+}
+
+model TriageRequest {
+  id              String               @id @default(auto()) @map("_id") @db.ObjectId
+  symptoms        String
+  specialization  Specialization
+  urgency         Urgency
+  source          TriageSource         @default(RULE_BASED)
+  modelName       String?
+  requestLanguage String?              @default("en")
+  notes           String?
+  createdAt       DateTime             @default(now())
+  recommendations TriageRecommendation[]
+
+  @@index([specialization])
+  @@index([urgency])
+  @@index([createdAt])
+  @@map("triage_requests")
+}
+
+model TriageRecommendation {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  triageRequestId String        @db.ObjectId
+  doctorId        String        @db.ObjectId
+  rank            Int
+  score           Float?
+  createdAt       DateTime      @default(now())
+  triageRequest   TriageRequest @relation(fields: [triageRequestId], references: [id])
+  doctor          Doctor        @relation(fields: [doctorId], references: [id])
+
+  @@unique([triageRequestId, doctorId])
+  @@unique([triageRequestId, rank])
+  @@index([doctorId])
+  @@map("triage_recommendations")
 }
