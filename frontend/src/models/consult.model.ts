@@ -8,6 +8,8 @@ export interface Doctor {
     name: string
     specialization: string
     experience: number | null
+    degrees: string[]
+    concentrations: string[]
     hospital: string
     chamber: string
     helpline: string

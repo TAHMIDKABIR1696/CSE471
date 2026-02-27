@@ -2,12 +2,19 @@ import { useEffect } from 'react'
 import { Doctor } from '../../models/consult.model'
 import {
     X, User, Star, Building2, MapPin, Phone, Clock,
-    Navigation, Award, Activity, Stethoscope
+    Navigation, Award, Activity, Stethoscope, GraduationCap, Target
 } from 'lucide-react'
 
 interface DoctorDetailModalProps {
     doctor: Doctor
     onClose: () => void
+}
+
+function buildMapsUrl(doctor: Doctor): string {
+    const parts = [doctor.hospital, doctor.chamber, doctor.address].filter(
+        (s) => s && s !== 'N/A'
+    )
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(', '))}`
 }
 
 function formatSpecialization(spec: string): string {
@@ -148,6 +155,48 @@ export default function DoctorDetailModal({ doctor, onClose }: DoctorDetailModal
                         </div>
                     </div>
 
+                    {/* Degrees / Education */}
+                    {doctor.degrees && doctor.degrees.length > 0 && (
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                            <GraduationCap className="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0" />
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Degrees & Education</p>
+                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                    {doctor.degrees.map((degree, i) => (
+                                        <span
+                                            key={i}
+                                            className="px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20
+                                                       text-xs font-medium text-amber-300"
+                                        >
+                                            {degree}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Areas of Expertise / Concentrations */}
+                    {doctor.concentrations && doctor.concentrations.length > 0 && (
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                            <Target className="w-5 h-5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                            <div>
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Areas of Expertise</p>
+                                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                                    {doctor.concentrations.map((item, i) => (
+                                        <span
+                                            key={i}
+                                            className="px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20
+                                                       text-xs font-medium text-cyan-300"
+                                        >
+                                            {item}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Hospital */}
                     <div className="flex items-start gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
                         <Building2 className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
@@ -204,7 +253,7 @@ export default function DoctorDetailModal({ doctor, onClose }: DoctorDetailModal
                 {/* Actions */}
                 <div className="p-6 pt-2 flex flex-col gap-3">
                     <a
-                        href={doctor.mapsLink}
+                        href={buildMapsUrl(doctor)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl

@@ -3,13 +3,13 @@ import ChatBox from '../components/ChatBox'
 import TriageResult from '../components/TriageResult'
 import DoctorCard from '../components/DoctorCard'
 import DoctorDetailModal from '../components/DoctorDetailModal'
-import LocationFilter from '../components/LocationFilter'
+import DoctorFilters from '../components/DoctorFilters'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useConsultController } from '../../controllers/useConsultController'
 import { Doctor } from '../../models/consult.model'
 
 export default function ConsultPageView() {
-    const { state, handleSubmit, handleReset, handleAreaChange, clearError } = useConsultController()
+    const { state, expRange, handleSubmit, handleReset, handleAreaChange, handleExpRangeChange, clearError } = useConsultController()
     const { step, isLoading, triageData, doctors, error, userSymptoms, selectedArea, availableAreas } = state
     const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
 
@@ -102,12 +102,14 @@ export default function ConsultPageView() {
                                     </span>
                                 </h3>
 
-                                {/* Location Filter */}
+                                {/* Filters */}
                                 <div className="mb-5">
-                                    <LocationFilter
+                                    <DoctorFilters
                                         areas={availableAreas}
                                         selectedArea={selectedArea}
-                                        onChange={handleAreaChange}
+                                        onAreaChange={handleAreaChange}
+                                        selectedExpRange={expRange}
+                                        onExpRangeChange={handleExpRangeChange}
                                         disabled={isLoading}
                                     />
                                 </div>
@@ -123,12 +125,14 @@ export default function ConsultPageView() {
                         {/* No doctors found */}
                         {doctors.length === 0 && (
                             <div className="max-w-3xl mx-auto">
-                                {/* Location Filter even when no results */}
+                                {/* Filters even when no results */}
                                 <div className="mb-5">
-                                    <LocationFilter
+                                    <DoctorFilters
                                         areas={availableAreas}
                                         selectedArea={selectedArea}
-                                        onChange={handleAreaChange}
+                                        onAreaChange={handleAreaChange}
+                                        selectedExpRange={expRange}
+                                        onExpRangeChange={handleExpRangeChange}
                                         disabled={isLoading}
                                     />
                                 </div>

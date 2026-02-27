@@ -42,6 +42,10 @@ export default function Hero() {
                                              hover:bg-white/5 hover:border-white/20 transition-all text-base font-medium">
                         How It Works
                     </a>
+                    <a href="#browse-doctors" className="px-8 py-3.5 rounded-xl border border-white/10 text-gray-300
+                                             hover:bg-white/5 hover:border-white/20 transition-all text-base font-medium">
+                        Browse Doctors
+                    </a>
                 </div>
 
                 {/* Trust indicators */}

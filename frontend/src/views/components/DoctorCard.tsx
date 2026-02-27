@@ -7,6 +7,13 @@ interface DoctorCardProps {
     onSelect: (doctor: Doctor) => void
 }
 
+function buildMapsUrl(doctor: Doctor): string {
+    const parts = [doctor.hospital, doctor.chamber, doctor.address].filter(
+        (s) => s && s !== 'N/A'
+    )
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(parts.join(', '))}`
+}
+
 export default function DoctorCard({ doctor, index, onSelect }: DoctorCardProps) {
     return (
         <div
@@ -72,7 +79,7 @@ export default function DoctorCard({ doctor, index, onSelect }: DoctorCardProps)
 
             {/* Action Button */}
             <a
-                href={doctor.mapsLink}
+                href={buildMapsUrl(doctor)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl

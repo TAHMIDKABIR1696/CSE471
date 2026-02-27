@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ConsultState } from '../models/consult.model'
 import { getDoctorsBySpecialization, getLocations } from '../services/doctors.service'
 import { classifySymptoms } from '../services/triage.service'
+import { ExperienceRange } from '../views/components/DoctorFilters'
 
 const initialState: ConsultState = {
     step: 'input',
@@ -16,6 +17,7 @@ const initialState: ConsultState = {
 
 export function useConsultController() {
     const [state, setState] = useState<ConsultState>(initialState)
+    const [expRange, setExpRange] = useState<ExperienceRange>({ min: undefined, max: undefined })
 
     useEffect(() => {
         getLocations()
@@ -23,8 +25,8 @@ export function useConsultController() {
             .catch(() => {})
     }, [])
 
-    const fetchDoctors = async (specialization: string, area: string) => {
-        return getDoctorsBySpecialization(specialization, area || undefined)
+    const fetchDoctors = async (specialization: string, area: string, exp: ExperienceRange = expRange) => {
+        return getDoctorsBySpecialization(specialization, area || undefined, exp.min, exp.max)
     }
 
     const handleSubmit = async (symptoms: string) => {
@@ -77,8 +79,23 @@ export function useConsultController() {
         }
     }
 
+    const handleExpRangeChange = async (range: ExperienceRange) => {
+        setExpRange(range)
+
+        if (state.triageData) {
+            setState((prev) => ({ ...prev, isLoading: true }))
+            try {
+                const doctors = await fetchDoctors(state.triageData!.specialization, state.selectedArea, range)
+                setState((prev) => ({ ...prev, doctors, isLoading: false }))
+            } catch {
+                setState((prev) => ({ ...prev, isLoading: false }))
+            }
+        }
+    }
+
     const handleReset = () => {
         setState((prev) => ({ ...initialState, availableAreas: prev.availableAreas }))
+        setExpRange({ min: undefined, max: undefined })
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -88,9 +105,11 @@ export function useConsultController() {
 
     return {
         state,
+        expRange,
         handleSubmit,
         handleReset,
         handleAreaChange,
+        handleExpRangeChange,
         clearError
     }
 }
