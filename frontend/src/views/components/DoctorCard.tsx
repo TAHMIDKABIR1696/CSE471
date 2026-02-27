@@ -1,9 +1,10 @@
-import { MapPin, Phone, Building2, Star, Navigation, User } from 'lucide-react'
+import { MapPin, Phone, Building2, Star, Navigation, User, Clock } from 'lucide-react'
 
 interface Doctor {
     id: string
     name: string
     specialization: string
+    experience: number | null
     hospital: string
     chamber: string
     helpline: string
@@ -33,6 +34,12 @@ export default function DoctorCard({ doctor, index }: DoctorCardProps) {
                     <div>
                         <h4 className="text-base font-semibold text-white leading-tight">{doctor.name}</h4>
                         <p className="text-xs text-primary-400 mt-0.5">{doctor.specialization.replace('_', ' ')}</p>
+                        {doctor.experience != null && (
+                            <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {doctor.experience} years experience
+                            </p>
+                        )}
                     </div>
                 </div>
                 {/* Rating */}

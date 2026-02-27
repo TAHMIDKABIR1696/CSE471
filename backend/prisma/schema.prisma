@@ -34,6 +34,7 @@ model Doctor {
   id               String               @id @default(auto()) @map("_id") @db.ObjectId
   name             String
   specialization   Specialization       @default(GENERAL_PHYSICIAN)
+  experience       Int?
   hospital         String
   chamber          String
   helpline         String

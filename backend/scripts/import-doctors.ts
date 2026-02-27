@@ -15,12 +15,14 @@ type CliOptions = {
 type DoctorImport = {
   name: string
   specialization: Specialization
+  experience: number | undefined
   hospital: string
   chamber: string
   helpline: string
   address: string
   mapsLink: string
   rating: number
+  credibilityScore: number
 }
 
 function getArgValue(flag: string): string | undefined {
@@ -36,7 +38,7 @@ function parseArgs(): CliOptions {
 
   const filePath = fileArg
     ? path.resolve(process.cwd(), fileArg)
-    : path.resolve(process.cwd(), 'data', 'doctors_processed_data.csv')
+    : path.resolve(process.cwd(), 'data', 'doctors_combined_data.csv')
 
   return { filePath, truncate, onlyDhaka }
 }
@@ -88,6 +90,12 @@ function deriveRating(experience: number | null): number {
   return Math.round(Math.min(5, rating) * 10) / 10
 }
 
+function deriveCredibility(rating: number, experience: number | null): number {
+  const expScore = experience !== null ? Math.min(30, experience) / 30 : 0.4
+  const score = rating / 5 * 0.5 + expScore * 0.5
+  return Math.round(score * 100) / 100
+}
+
 function buildAddress(row: CsvRow): string {
   const address = pick(row, ['Address', 'Location'])
   if (address) return address
@@ -119,7 +127,9 @@ function buildDoctor(row: CsvRow): DoctorImport | null {
   const address = buildAddress(row)
   const helpline = pick(row, ['ContactNo']) || 'N/A'
   const experience = parseExperience(pick(row, ['Experience']))
+  const experienceYears = experience !== null ? Math.floor(experience) : undefined
   const rating = deriveRating(experience)
+  const credibilityScore = deriveCredibility(rating, experience)
 
   const mapsQuery = encodeURIComponent(address || chamberData.chamber || chamberData.hospital)
   const mapsLink = `https://maps.google.com/?q=${mapsQuery}`
@@ -127,12 +137,14 @@ function buildDoctor(row: CsvRow): DoctorImport | null {
   return {
     name,
     specialization,
+    experience: experienceYears,
     hospital: chamberData.hospital,
     chamber: chamberData.chamber,
     helpline,
     address,
     mapsLink,
-    rating
+    rating,
+    credibilityScore
   }
 }
 

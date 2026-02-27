@@ -7,6 +7,7 @@ export interface Doctor {
     id: string
     name: string
     specialization: string
+    experience: number | null
     hospital: string
     chamber: string
     helpline: string

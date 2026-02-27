@@ -50,7 +50,8 @@ async function classifyWithOpenAI(symptoms: string): Promise<TriageResult> {
     return classifyRuleBased(symptoms)
   }
 
-  const response = await client.chat.completions.create({
+  try {
+    const response = await client.chat.completions.create({
     model: config.openaiModel,
     temperature: 0.1,
     response_format: {
@@ -96,6 +97,10 @@ async function classifyWithOpenAI(symptoms: string): Promise<TriageResult> {
   } catch {
     return classifyRuleBased(symptoms)
   }
+  } catch {
+    console.warn('OpenAI API call failed, falling back to rule-based classification.')
+    return classifyRuleBased(symptoms)
+  }
 }
 
 function classifyRuleBased(symptoms: string): TriageResult {
@@ -116,7 +121,8 @@ function classifyRuleBased(symptoms: string): TriageResult {
     s.includes('slurred speech') ||
     s.includes('suicidal') ||
     s.includes('bleeding heavily') ||
-    s.includes('uncontrolled bleeding')
+    s.includes('uncontrolled bleeding') ||
+    (s.includes('chest') && s.includes('sweating'))
   ) {
     urgency = 'EMERGENCY'
   } else if (s.includes('severe') || s.includes('intense') || s.includes('worsening')) {
@@ -129,6 +135,7 @@ function classifyRuleBased(symptoms: string): TriageResult {
   if (
     s.includes('heart') ||
     s.includes('chest pain') ||
+    s.includes('chest pressure') ||
     s.includes('palpitations') ||
     s.includes('pressure in chest')
   ) {

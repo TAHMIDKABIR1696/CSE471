@@ -9,7 +9,7 @@ type FindDoctorsParams = {
 export async function findRecommendedDoctors({ specialization, limit }: FindDoctorsParams) {
   const doctors = await prisma.doctor.findMany({
     where: specialization ? { specialization } : {},
-    orderBy: [{ rating: 'desc' }, { name: 'asc' }]
+    orderBy: [{ credibilityScore: 'desc' }, { rating: 'desc' }, { name: 'asc' }]
   })
 
   const dhakaDoctors = doctors.filter((doctor) => {
