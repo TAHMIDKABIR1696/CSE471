@@ -9,6 +9,7 @@ export default function Navbar() {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Consult Now', path: '/consult' },
+        { name: 'Hospitals', path: '/hospitals' },
     ]
 
     return (
