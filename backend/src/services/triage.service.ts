@@ -176,9 +176,14 @@ function classifyRuleBased(symptoms: string): TriageResult {
     specialization = 'PEDIATRICIAN'
   } else if (
     s.includes('anxiety') ||
+    s.includes('anxious') ||
     s.includes('depression') ||
+    s.includes('depressed') ||
     s.includes('panic') ||
-    s.includes('insomnia')
+    s.includes('insomnia') ||
+    s.includes('cannot sleep') ||
+    s.includes('can\'t sleep') ||
+    s.includes('suicidal')
   ) {
     specialization = 'PSYCHIATRIST'
   }

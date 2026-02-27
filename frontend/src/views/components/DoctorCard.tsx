@@ -1,28 +1,18 @@
 import { MapPin, Phone, Building2, Star, Navigation, User, Clock } from 'lucide-react'
-
-interface Doctor {
-    id: string
-    name: string
-    specialization: string
-    experience: number | null
-    hospital: string
-    chamber: string
-    helpline: string
-    address: string
-    mapsLink: string
-    rating: number
-}
+import { Doctor } from '../../models/consult.model'
 
 interface DoctorCardProps {
     doctor: Doctor
     index: number
+    onSelect: (doctor: Doctor) => void
 }
 
-export default function DoctorCard({ doctor, index }: DoctorCardProps) {
+export default function DoctorCard({ doctor, index, onSelect }: DoctorCardProps) {
     return (
         <div
-            className="glass-card-hover p-6 animate-slide-up"
+            className="glass-card-hover p-6 animate-slide-up cursor-pointer"
             style={{ animationDelay: `${index * 100}ms` }}
+            onClick={() => onSelect(doctor)}
         >
             <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">

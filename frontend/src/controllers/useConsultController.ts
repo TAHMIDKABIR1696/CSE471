@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ConsultState } from '../models/consult.model'
-import { getDoctorsBySpecialization } from '../services/doctors.service'
+import { getDoctorsBySpecialization, getLocations } from '../services/doctors.service'
 import { classifySymptoms } from '../services/triage.service'
 
 const initialState: ConsultState = {
@@ -9,11 +9,23 @@ const initialState: ConsultState = {
     triageData: null,
     doctors: [],
     error: null,
-    userSymptoms: ''
+    userSymptoms: '',
+    selectedArea: '',
+    availableAreas: []
 }
 
 export function useConsultController() {
     const [state, setState] = useState<ConsultState>(initialState)
+
+    useEffect(() => {
+        getLocations()
+            .then((areas) => setState((prev) => ({ ...prev, availableAreas: areas })))
+            .catch(() => {})
+    }, [])
+
+    const fetchDoctors = async (specialization: string, area: string) => {
+        return getDoctorsBySpecialization(specialization, area || undefined)
+    }
 
     const handleSubmit = async (symptoms: string) => {
         setState((prev) => ({
@@ -25,7 +37,7 @@ export function useConsultController() {
 
         try {
             const triageData = await classifySymptoms(symptoms)
-            const doctors = await getDoctorsBySpecialization(triageData.specialization)
+            const doctors = await fetchDoctors(triageData.specialization, state.selectedArea)
 
             setState((prev) => ({
                 ...prev,
@@ -51,8 +63,22 @@ export function useConsultController() {
         }
     }
 
+    const handleAreaChange = async (area: string) => {
+        setState((prev) => ({ ...prev, selectedArea: area }))
+
+        if (state.triageData) {
+            setState((prev) => ({ ...prev, isLoading: true }))
+            try {
+                const doctors = await fetchDoctors(state.triageData!.specialization, area)
+                setState((prev) => ({ ...prev, doctors, isLoading: false }))
+            } catch {
+                setState((prev) => ({ ...prev, isLoading: false }))
+            }
+        }
+    }
+
     const handleReset = () => {
-        setState(initialState)
+        setState((prev) => ({ ...initialState, availableAreas: prev.availableAreas }))
         window.scrollTo({ top: 0, behavior: 'smooth' })
     }
 
@@ -64,6 +90,7 @@ export function useConsultController() {
         state,
         handleSubmit,
         handleReset,
+        handleAreaChange,
         clearError
     }
 }

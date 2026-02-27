@@ -1,12 +1,17 @@
+import { useState } from 'react'
 import ChatBox from '../components/ChatBox'
 import TriageResult from '../components/TriageResult'
 import DoctorCard from '../components/DoctorCard'
+import DoctorDetailModal from '../components/DoctorDetailModal'
+import LocationFilter from '../components/LocationFilter'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 import { useConsultController } from '../../controllers/useConsultController'
+import { Doctor } from '../../models/consult.model'
 
 export default function ConsultPageView() {
-    const { state, handleSubmit, handleReset, clearError } = useConsultController()
-    const { step, isLoading, triageData, doctors, error, userSymptoms } = state
+    const { state, handleSubmit, handleReset, handleAreaChange, clearError } = useConsultController()
+    const { step, isLoading, triageData, doctors, error, userSymptoms, selectedArea, availableAreas } = state
+    const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null)
 
     return (
         <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 min-h-screen">
@@ -96,9 +101,20 @@ export default function ConsultPageView() {
                                         ({doctors.length} found)
                                     </span>
                                 </h3>
+
+                                {/* Location Filter */}
+                                <div className="mb-5">
+                                    <LocationFilter
+                                        areas={availableAreas}
+                                        selectedArea={selectedArea}
+                                        onChange={handleAreaChange}
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {doctors.map((doctor, index) => (
-                                        <DoctorCard key={doctor.id} doctor={doctor} index={index} />
+                                        <DoctorCard key={doctor.id} doctor={doctor} index={index} onSelect={setSelectedDoctor} />
                                     ))}
                                 </div>
                             </div>
@@ -106,10 +122,23 @@ export default function ConsultPageView() {
 
                         {/* No doctors found */}
                         {doctors.length === 0 && (
-                            <div className="max-w-3xl mx-auto text-center py-8">
-                                <p className="text-gray-500 text-sm">
-                                    No doctors found for this specialization. Please try again or consult a general physician.
-                                </p>
+                            <div className="max-w-3xl mx-auto">
+                                {/* Location Filter even when no results */}
+                                <div className="mb-5">
+                                    <LocationFilter
+                                        areas={availableAreas}
+                                        selectedArea={selectedArea}
+                                        onChange={handleAreaChange}
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                                <div className="text-center py-8">
+                                    <p className="text-gray-500 text-sm">
+                                        {selectedArea
+                                            ? `No doctors found in ${selectedArea}. Try selecting a different area or "All Dhaka".`
+                                            : 'No doctors found for this specialization. Please try again or consult a general physician.'}
+                                    </p>
+                                </div>
                             </div>
                         )}
 
@@ -136,6 +165,14 @@ export default function ConsultPageView() {
                     </div>
                 )}
             </div>
+
+            {/* Doctor Detail Modal */}
+            {selectedDoctor && (
+                <DoctorDetailModal
+                    doctor={selectedDoctor}
+                    onClose={() => setSelectedDoctor(null)}
+                />
+            )}
         </div>
     )
 }

@@ -13,7 +13,9 @@ export interface Doctor {
     helpline: string
     address: string
     mapsLink: string
+    city: string
     rating: number
+    credibilityScore: number
 }
 
 export type ConsultationStep = 'input' | 'result'
@@ -25,4 +27,6 @@ export interface ConsultState {
     doctors: Doctor[]
     error: string | null
     userSymptoms: string
+    selectedArea: string
+    availableAreas: string[]
 }
